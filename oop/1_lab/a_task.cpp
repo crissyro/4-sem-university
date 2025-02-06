@@ -14,7 +14,7 @@ void readOutputFile(const string& filename) {
     }
     
     cout << "Числа в выходном файле: \n";
-    
+
     int number;
     while (inputFile.read(reinterpret_cast<char*>(&number), sizeof(int))) 
         cout << number << endl;
@@ -24,8 +24,8 @@ void readOutputFile(const string& filename) {
 }
 
 int main() {
-    ifstream input("input.txt");
-    ofstream output("output.bin", ios::binary);
+    ifstream input("input_a.txt");
+    ofstream output("output_a.bin", ios::binary);
     
     if (!input.is_open() || !output.is_open()) {
         cerr << "Ошибка открытия файлов!" << endl;

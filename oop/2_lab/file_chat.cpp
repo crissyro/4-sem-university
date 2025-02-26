@@ -55,5 +55,24 @@ class Chat {
 private:
     static const std::string CHAT_FILE_PATH;
 
+    static void save(const Message& message) {
+        std::ofstream file(CHAT_FILE_PATH, std::ios::app);
+        if(file) file << message.serialize();
+    }
 
+    static std::vector<Message> load() {
+        std::vector<Message> messages;
+        std::ifstream file(CHAT_FILE_PATH);
+
+        if(file) {
+            std::string line;
+            while(getline(file, line)) {
+                messages.push_back(Message::deserialize(line));
+            }
+        }
+
+        return messages;
+    }
+
+    inline static void clear() { std::ofstream file(CHAT_FILE_PATH, std::ios::trunc); }
 };

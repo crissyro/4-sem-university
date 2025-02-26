@@ -18,16 +18,6 @@ public:
     inline bool operator==(const Date& other) const {
         return day == other.day && month == other.month && year == other.year;
     }
-
-    inline std::string toString() const {
-        std::ostringstream oss;
-        oss << std::setfill('0') 
-            << std::setw(2) << day << "."
-            << std::setw(2) << month << "."
-            << year;
-
-        return oss.str();
-    }
 };
 
 class Client {
@@ -107,6 +97,38 @@ public:
     inline bool isCriteria(const Date& targetDate) const override { return accountDate == targetDate; }
 };
 
+class ClientsBase {
+private: 
+    std::vector<Client*> clients;
+
+public:
+    ClientsBase(const std::vector<Client*>& clients_) : clients(clients_) {}
+    ClientsBase(ClientsBase&& other) noexcept : clients(std::move(other.clients)) {}
+
+    inline void printClients() const {
+        std::cout << "Все клиенты:\n";
+        for (const auto& client : clients) { 
+            client->printInfo(); 
+        }
+    }
+
+    inline void printTargetClients(Date& targetDate) const {
+        printf("\nКлиенты с датой %d.%d.%d:\n", targetDate.getDay(), targetDate.getMonth(), targetDate.getYear());
+        for (const auto& client : clients) { 
+            if (client->isCriteria(targetDate)) { 
+                client->printInfo(); 
+            }
+        }
+    }
+    void addClient(Client* client) { clients.push_back(client); }
+
+    ~ClientsBase() {
+        for (auto& client : clients) {
+            delete client;
+        }
+    }
+};
+
 int main() {
     std::vector<Client*> clients = {
         new Depositor("Иваныч", {15, 5, 2025}, 510, 5.5),
@@ -118,19 +140,10 @@ int main() {
         new Depositor("Мавроди", {15, 5, 2020}, 750000, 6.0)
     };
 
-    std::cout << "Все клиенты:\n";
-
-    for (const auto& client : clients) { client->printInfo(); }
-
-    Date searchDate{15, 5, 2020};
-    std::cout << "\nКлиенты с датой сотрудничества 15.05.2020:\n";
-    for (const auto& client : clients) {
-        if (client->isCriteria(searchDate)) {
-            client->printInfo();
-        }
-    }
-
-    for (auto& client : clients) { delete client; }
+    ClientsBase clientsBase(clients);
+    clientsBase.printClients();
+    Date targetDate(15, 5, 2025);
+    clientsBase.printTargetClients(targetDate);
 
     return 0;
 }

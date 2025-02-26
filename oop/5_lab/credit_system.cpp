@@ -18,8 +18,15 @@ public:
     bool operator==(const Date& other) const {
         return day == other.day && month == other.month && year == other.year;
     }
-
 };
+
+class Client {
+public: 
+    virtual ~Client() = default;
+    virtual void printInfo() const = 0;
+    virtual bool isCriteria() const = 0;
+};
+
 
 
 int main () {

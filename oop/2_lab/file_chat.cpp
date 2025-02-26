@@ -52,7 +52,7 @@ public:
 };
 
 class Chat {
-private:
+public:
     static const std::string CHAT_FILE_PATH;
 
     static void save(const Message& message) {
@@ -79,7 +79,7 @@ private:
 
 class ChatPrinter {
 public:
-    inline static void printMessage(const std::vector<Message>& messages) {
+    inline static void printMessages(const std::vector<Message>& messages) {
         if (messages.empty()) {
             printWarning("Чат пуст");
             return;
@@ -98,6 +98,26 @@ public:
 
     inline static void printSuccess(const std::string& message) {
         std::cout << GREEN << message << RESET << std::endl;
+    }
+};
+
+class ChatManager {
+public:
+    static void sendMessage(const std::string& username, const std::string& content) {
+        if(username.empty() || content.empty()) {
+            ChatPrinter::printError("Нельзя отправить пустое сообщение!");
+            return;
+        }
+
+        Chat::save(Message(username, content));
+        ChatPrinter::printSuccess("Сообщение отправлено!");
+    }
+
+    inline static void showChatHistory() { ChatPrinter::printMessages(Chat::load()); }
+
+    inline static void clearChatHistory() {
+        Chat::clear();
+        ChatPrinter::printSuccess("Чат успешно очищен!");
     }
 };
 

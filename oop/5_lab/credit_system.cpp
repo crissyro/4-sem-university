@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <iomanip>
-
+#include <memory>
 
 class Date {
 private:
@@ -99,51 +99,60 @@ public:
 
 class ClientsBase {
 private: 
-    std::vector<Client*> clients;
+    std::vector<std::unique_ptr<Client>> clients;
 
 public:
-    ClientsBase(const std::vector<Client*>& clients_) : clients(clients_) {}
-    ClientsBase(ClientsBase&& other) noexcept : clients(std::move(other.clients)) {}
+    ClientsBase() = default;
+    
+    inline void addClient(std::unique_ptr<Client> client) { clients.push_back(std::move(client)); }
+    
+    inline const std::vector<std::unique_ptr<Client>>& getClients() const {  return clients;  }
+};
 
-    inline void printClients() const {
+class ClientsBaseMenu {
+private:
+    const ClientsBase& base;
+
+public:
+    explicit ClientsBaseMenu(const ClientsBase& b) : base(b) {}
+
+    void printAllClients() const {
         std::cout << "Все клиенты:\n";
-        for (const auto& client : clients) { 
+        for (const auto& client : base.getClients()) { 
             client->printInfo(); 
         }
     }
 
-    inline void printTargetClients(Date& targetDate) const {
-        printf("\nКлиенты с датой %d.%d.%d:\n", targetDate.getDay(), targetDate.getMonth(), targetDate.getYear());
-        for (const auto& client : clients) { 
+    void printClientsByDate(const Date& targetDate) const {
+        std::cout << "\nКлиенты с датой "
+                  << std::setfill('0') << std::setw(2) << targetDate.getDay() << "."
+                  << std::setw(2) << targetDate.getMonth() << "."
+                  << targetDate.getYear() << ":\n";
+                  
+        for (const auto& client : base.getClients()) { 
             if (client->isCriteria(targetDate)) { 
                 client->printInfo(); 
             }
         }
     }
-    void addClient(Client* client) { clients.push_back(client); }
-
-    ~ClientsBase() {
-        for (auto& client : clients) {
-            delete client;
-        }
-    }
 };
 
 int main() {
-    std::vector<Client*> clients = {
-        new Depositor("Иваныч", {15, 5, 2025}, 510, 5.5),
-        new Creditor("Петрова", {15, 10, 2023}, 4000000, 7.0, 50000),
-        new Depositor("Сидорова", {10, 8, 2024}, 3500000, 6.2),
-        new Creditor("Левина", {10, 7, 2022}, 3000000, 6.8, 100000),
-        new Creditor("Мороз", {20, 6, 2021}, 1000000, 7.2, 250000),
-        new Organization("ООО \'БНАЛ\'", {10, 1, 2022}, "40702810500000000001", 2500000),
-        new Depositor("Мавроди", {15, 5, 2020}, 750000, 6.0)
-    };
+    ClientsBase base;
+    
+    base.addClient(std::make_unique<Depositor>("Иваныч", Date{15, 5, 2025}, 510, 5.5));
+    base.addClient(std::make_unique<Creditor>("Петрова", Date{15, 10, 2023}, 4000000, 7.0, 50000));
+    base.addClient(std::make_unique<Depositor>("Сидорова", Date{10, 8, 2024}, 3500000, 6.2));
+    base.addClient(std::make_unique<Creditor>("Левина", Date{10, 7, 2022}, 3000000, 6.8, 100000));
+    base.addClient(std::make_unique<Creditor>("Мороз", Date{20, 6, 2021}, 1000000, 7.2, 250000));
+    base.addClient(std::make_unique<Organization>("ООО 'БНАЛ'", Date{10, 1, 2022}, "40702810500000000001", 2500000));
+    base.addClient(std::make_unique<Depositor>("Мавроди", Date{15, 5, 2020}, 750000, 6.0));
 
-    ClientsBase clientsBase(clients);
-    clientsBase.printClients();
+    ClientsBaseMenu menu(base);
+    menu.printAllClients();
+    
     Date targetDate(15, 5, 2025);
-    clientsBase.printTargetClients(targetDate);
+    menu.printClientsByDate(targetDate);
 
     return 0;
 }

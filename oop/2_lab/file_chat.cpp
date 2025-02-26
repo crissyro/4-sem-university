@@ -12,6 +12,7 @@
 #define YELLOW  "\033[33m"
 #define BLUE    "\033[34m"
 #define CYAN    "\033[36m"
+#define MAGENTA "\033[35m"
 
 class Message {
 private:
@@ -121,3 +122,72 @@ public:
     }
 };
 
+class ChatInterface {
+public:
+    void run() {
+        while(true) {
+            displayMenu();
+
+            int choice;
+            std::cin >> choice;
+            std::cin.ignore();
+
+            handleChoice(choice);
+        }
+    }
+
+private:
+    ChatManager manager;
+
+    std::string getInput(const std::string& prompt) {
+        std::cout << prompt;
+        std::string input;
+
+        getline(std::cin, input);
+
+        return input;
+    }
+
+    void displayMenu() {
+        std::cout << "\n" << MAGENTA << "=== Файловый Чат ===" << RESET << "\n"
+                  << "1. Отправить сообщение\n"
+                  << "2. Просмотреть историю\n"
+                  << "3. Очистить чат\n"
+                  << "4. Выход\n"
+                  << CYAN << "Выберите действие: " << RESET;
+    }
+
+    void handleChoice(int choice) {
+        switch(choice) {
+            case 1: {
+                std::string username = getInput("Введите ваше имя: ");
+                std::string content = getInput("Введите сообщение: ");
+                manager.sendMessage(username, content);
+                break;
+            }
+
+            case 2:
+                manager.showChatHistory();
+                break;
+
+            case 3:
+                manager.clearChatHistory();
+                break;
+
+            case 4:
+                ChatPrinter::printSuccess("Выход из программы...");
+                exit(0);
+
+            default:
+                ChatPrinter::printError("Некорректный выбор!");
+        }
+    }
+};
+
+int main() {
+
+    ChatInterface chat;
+    chat.run();
+    
+    return 0;
+}

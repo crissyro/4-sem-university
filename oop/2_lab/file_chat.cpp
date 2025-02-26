@@ -76,3 +76,28 @@ private:
 
     inline static void clear() { std::ofstream file(CHAT_FILE_PATH, std::ios::trunc); }
 };
+
+class ChatPrinter {
+public:
+    inline static void printMessage(const std::vector<Message>& messages) {
+        if (messages.empty()) {
+            printWarning("Чат пуст");
+            return;
+        }
+
+        for (const auto& msg: messages) msg.display();
+    } 
+
+    inline static void printWarning(const std::string& message) {
+        std::cout << YELLOW << message << RESET << std::endl;
+    }
+
+    inline static void printError(const std::string& message) {
+        std::cerr << RED << "Ошибка: " << message << RESET << std::endl;
+    }
+
+    inline static void printSuccess(const std::string& message) {
+        std::cout << GREEN << message << RESET << std::endl;
+    }
+};
+

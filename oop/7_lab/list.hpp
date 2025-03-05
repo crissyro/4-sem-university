@@ -13,8 +13,10 @@ template<typename T, typename Alloc = std::allocator<T>>
 class List {
 private:    
     using alloc_traits = std::allocator_traits<Alloc>;
+    using node_allocator = typename alloc_traits::template rebind_alloc<Node>;
+    using node_alloc_traits = std::allocator_traits<node_allocator>;
     using value_type = T;
-    using size_type = std::size_t
+    using size_type = std::size_tж
     using difference_type = std::ptrdiff_t;
     using reference = value_type&;
     using const_reference = const value_type&;
@@ -29,20 +31,15 @@ private:
         value_type value;
         Node* prev;
         Node* next;
-        Node() : prev(nullptr), next(nullptr) {}
-        Node(value_type&& val, Node* p = nullptr, Node* n = nullptr) : value(std::move(val)), prev(p), next(n) {}
-        Node(const value_type& val, Node* p = nullptr, Node* n = nullptr) : value(val), prev(p), next(n) {}
-        ~Node() {
-            if (prev) prev->next = next;
-            if (next) next->prev = prev;
-            alloc_traits::destroy(allocator, &value);
-            alloc_traits::deallocate(allocator, this, 1);
-        }
+
+        template<typename... Args>
+        Node(Args&&... args) : value(std::forward<Args>(args)...), prev(nullptr), next(nullptr) {}
     }
 
-    Alloc allocator;
-    Node* head;
-    Node* tail;
+    node_allocator alloc_;
+    Node* head_;
+    Node* tail_;
+    size_type size_;
 
 public:
 

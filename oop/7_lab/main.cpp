@@ -1,10 +1,9 @@
 #include "list.hpp"
 #include <iostream>
 
-using namespace mylist;
 
 int main() {
-    List<int> intList;
+    mylist::List<int> intList;
 
     intList.push_back(1);
     intList.push_back(2);

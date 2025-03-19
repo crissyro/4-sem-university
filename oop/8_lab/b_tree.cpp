@@ -49,7 +49,7 @@ template <typename T, typename Alloc>
 void BTree<T, Alloc>::splitChild(Node* parent, int index) {
     Node* child = parent->children[index];
     Node* new_node = alloc.allocate(1);
-    
+
     alloc.construct(new_node, child->is_leaf, alloc);
 
     new_node->keys.assign(child->keys.begin()+t, child->keys.end());
@@ -62,4 +62,23 @@ void BTree<T, Alloc>::splitChild(Node* parent, int index) {
 
     parent->keys.insert(parent->keys.begin()+index, child->keys[t-1]);
     parent->children.insert(parent->children.begin()+index+1, new_node);
+}
+
+template <typename T, typename Alloc>
+void BTree<T, Alloc>::insertNonFull(Node* node, const T& key) {
+    int idx = node->keys.size()-1;
+    
+    if(node->is_leaf) {
+        node->keys.insert(std::upper_bound(node->keys.begin(), node->keys.end(), key), key);
+    } else {
+        while(idx >= 0 && key < node->keys[idx]) idx--;
+        idx++;
+        
+        if(node->children[idx]->keys.size() == 2*t-1) {
+            splitChild(node, idx);
+            if(key > node->keys[idx]) idx++;
+        }
+        
+        insertNonFull(node->children[idx], key);
+    }
 }

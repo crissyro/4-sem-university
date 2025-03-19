@@ -41,6 +41,25 @@ void BTree<T, Alloc>::insert(const T& key) {
         splitChild(new_root, 0);
         root = new_root;
     }
-    
+
     insertNonFull(root, key);
+}
+
+template <typename T, typename Alloc>
+void BTree<T, Alloc>::splitChild(Node* parent, int index) {
+    Node* child = parent->children[index];
+    Node* new_node = alloc.allocate(1);
+    
+    alloc.construct(new_node, child->is_leaf, alloc);
+
+    new_node->keys.assign(child->keys.begin()+t, child->keys.end());
+    child->keys.resize(t-1);
+
+    if(!child->is_leaf) {
+        new_node->children.assign(child->children.begin()+t, child->children.end());
+        child->children.resize(t);
+    }
+
+    parent->keys.insert(parent->keys.begin()+index, child->keys[t-1]);
+    parent->children.insert(parent->children.begin()+index+1, new_node);
 }

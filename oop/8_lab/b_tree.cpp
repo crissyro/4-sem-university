@@ -78,7 +78,12 @@ void BTree<T, Alloc>::insertNonFull(Node* node, const T& key) {
             splitChild(node, idx);
             if(key > node->keys[idx]) idx++;
         }
-        
+
         insertNonFull(node->children[idx], key);
     }
+}
+
+template <typename T, typename Alloc>
+inline bool BTree<T, Alloc>::contains(const T& key) const {
+    return search(root, key) != nullptr;
 }

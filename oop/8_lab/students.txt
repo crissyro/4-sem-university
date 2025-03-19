@@ -1,3 +1,4 @@
 Ivanov 22 5
 Moroz 19 2
 Linus 52 52
+Ivan 20 0

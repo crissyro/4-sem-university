@@ -1,52 +1,42 @@
 #pragma once
 
-#include <iostream>
 #include <vector>
 #include <memory>
 #include <algorithm>
 
 
-template <typename T>
-class BTreeNode {
+template <typename T, typename Alloc = std::allocator<T>>
+class BTree {
 private:
-    bool is_leaf_;
-    std::vector<T> keys_;
-    std::vector<std::unique_ptr<BTreeNode>> children_;
+    struct Node;
+    using NodeAlloc = typename Alloc::template rebind<Node>::other;
+    
+    NodeAlloc alloc;
+    Node* root;
+    const int t;
+
+    void splitChild(Node* parent, int index);
+    void insertNonFull(Node* node, const T& key);
+    void balance(Node* node);
+    void deleteNode(Node* node);
 
 public:
-    explicit BTreeNode(bool is_leaf = true) : is_leaf_(is_leaf) {}
-
-    ~BTreeNode() = default;
-
-    inline bool is_leaf() const { 
-        return is_leaf_; 
-    }
-
-    inline const std::vector<T>& keys() const { 
-        return keys_; 
-    }
-
-    inline size_t num_keys() const { 
-        return keys_.size(); 
-    }
-
-    inline const std::unique_ptr<BTreeNode>& child(size_t index) const { 
-        return children_[index]; 
-    }
-
-    inline void insert_key(size_t index, const T& key) { 
-        keys_.insert(keys_.begin() + index, key); 
-    }
-
-    inline void erase_key(size_t index) { 
-        keys_.erase(keys_.begin() + index); 
-    }
+    explicit BTree(int order = 4, const Alloc& alloc = Alloc());
     
-    inline void add_child(size_t index, std::unique_ptr<BTreeNode> child) { 
-        children_.insert(children_.begin() + index, std::move(child)); 
-    }
+    ~BTree();
+    
+    void insert(const T& key);
+    void erase(const T& key);
+    bool search(const T& key) const;
+    void print() const;
+};
 
-    inline void remove_child(size_t index) { 
-        children_.erase(children_.begin() + index); 
-    }
+template <typename T, typename Alloc>
+struct BTree<T, Alloc>::Node {
+    bool is_leaf;
+    std::vector<T, Alloc> keys;
+    std::vector<Node*> children;
+
+    Node(bool leaf, const Alloc& alloc) 
+        : is_leaf(leaf), keys(alloc), children(alloc) {}
 };

@@ -10,25 +10,25 @@
 
 #define EPSILON 1e-6
 
-class Vertex {
+class Point {
 private:
     _Float32 x;
     _Float32 y;
     _Float32 z;
 
 public:
-    Vertex(_Float32 x = 0, _Float32 y = 0, _Float32 z = 0) :
+    Point(_Float32 x = 0, _Float32 y = 0, _Float32 z = 0) :
         x(x), y(y), z(z) {}
 
-    ~Vertex() = default;
+    ~Point() = default;
 
-    bool operator==(const Vertex& other) const;
+    bool operator==(const Point& other) const;
 
-    bool operator<(const Vertex& other) const;
+    bool operator<(const Point& other) const;
 
-    _Float32 distance(const Vertex& other) const;
+    _Float32 distance(const Point& other) const;
 
-    _Float32 dot(const Vertex& other) const;
+    _Float32 dot(const Point& other) const;
 
     inline _Float32 getX() const { return x ;}
     inline _Float32 getY() const { return y ;}
@@ -68,10 +68,10 @@ public:
 
 class OBJModel {
 private:
-    std::list<Vertex> vertices;
+    std::list<Point> vertices;
     std::list<Triangle> triangles;
 
-    size_t findOrAddVertex(const Vertex& v);
+    size_t findOrAddVertex(const Point& v);
 
 public:
     OBJModel() = default;
@@ -84,6 +84,4 @@ public:
     void sortVertices();
     void sortTriangles();
     void print() const;
-
-
 };

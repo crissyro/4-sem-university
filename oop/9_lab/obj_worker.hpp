@@ -37,6 +37,15 @@ public:
     inline void setZ(_Float32 z) { this->z = z; }
 };
 
-class TRiangle {
+class Triangle {
+private:
+    u_int32_t v1;
+    u_int32_t v2;
+    u_int32_t v3;
+    u_int32_t color;
+
+public:
+
+
 
 };

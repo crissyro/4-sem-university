@@ -62,3 +62,15 @@ public:
     inline void setColor(u_int32_t color) { this->color = color; }
 };
 
+class OBJModel {
+private:
+    std::list<Vertex> vertices;
+    std::list<Triangle> triangles;
+
+    size_t findOrAddVertex(const Vertex& v);
+
+public:
+    
+
+
+};

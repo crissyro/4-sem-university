@@ -5,72 +5,83 @@
 class OBJModelTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        createTestFiles();
+        createComplexTestFile();
     }
 
     void TearDown() override {
-        removeTestFiles();
+        remove("complex_input.obj");
+        remove("processed.obj");
     }
 
-    void createTestFiles() {
-        std::ofstream("valid.obj") << "v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\nf 2 3 1\n";
-        std::ofstream("empty.obj");
-    }
-
-    void removeTestFiles() {
-        remove("valid.obj");
-        remove("empty.obj");
-        remove("output.obj");
+    void createComplexTestFile() {
+        std::ofstream f("complex_input.obj");
+        f << "# Complex model with normals\n";
+        for(int i = 0; i < 1000; ++i) {
+            f << "v " << i << " " << i+1 << " " << i+2 << "\n";
+            f << "vn " << 0 << " " << 0 << " " << 1 << "\n";
+        }
+        for(int i = 1; i <= 997; ++i) {
+            f << "f " << i << "//" << i << " " 
+              << i+1 << "//" << i+1 << " " 
+              << i+2 << "//" << i+2 << "\n";
+        }
     }
 };
 
-TEST(PointTest, Equality) {
-    Point p1(1.0f, 2.0f, 3.0f);
-    Point p2(1.0f, 2.0f, 3.0f);
-    Point p3(1.1f, 2.0f, 3.0f);
-    ASSERT_TRUE(p1 == p2);
-    ASSERT_FALSE(p1 == p3);
-}
-
-TEST(PointTest, DistanceCalculation) {
-    Point p1(0, 0, 0);
-    Point p2(3, 4, 0);
-    EXPECT_FLOAT_EQ(p1.distance(p2), 5.0f);
-}
-
-TEST(TriangleTest, ColorOperations) {
-    Triangle t(1, 2, 3);
-    t.setColor(0xFF00FF);
-    EXPECT_EQ(t.getColor(), 0xFF00FF);
-}
-
-TEST_F(OBJModelTest, LoadInvalidFile) {
+TEST_F(OBJModelTest, CleanProcessing) {
     OBJModel model;
-    EXPECT_FALSE(model.loadFromFile("nonexistent.obj"));
-}
-
-TEST_F(OBJModelTest, ColorAssignment) {
-    OBJModel model;
-    model.loadFromFile("valid.obj");
-    model.setColorOBJ(0x00FF00);
     
-    for (const auto& t : model.getTriangles()) {
-        EXPECT_EQ(t.getColor(), 0x00FF00);
+    ASSERT_TRUE(model.loadFromFile("complex_input.obj"));
+    
+    ASSERT_EQ(model.getPoints().size(), 1000);
+    ASSERT_EQ(model.getTriangles().size(), 997 * 1); 
+
+    model.removeUnusedVertices();
+    model.sortPoints();
+    model.sortTriangles();
+    
+    model.saveToFile("processed.obj");
+
+    std::ifstream out("processed.obj");
+    std::string line;
+    int vertex_count = 0;
+    int normal_count = 0;
+    int face_count = 0;
+
+    while(std::getline(out, line)) {
+        if(line.substr(0, 2) == "v ") vertex_count++;
+        if(line.substr(0, 3) == "vn ") normal_count++;
+        if(line.substr(0, 2) == "f ") face_count++;
+    }
+
+    EXPECT_EQ(normal_count, 0) << "All normals should be removed";
+    EXPECT_EQ(vertex_count, model.getPoints().size());
+    EXPECT_EQ(face_count, model.getTriangles().size());
+    
+    auto& verts = model.getPoints();
+    for(size_t i = 1; i < verts.size(); ++i) {
+        ASSERT_FALSE(verts[i-1] == verts[i]) 
+            << "Duplicate vertices at positions " 
+            << i-1 << " and " << i;
     }
 }
 
-TEST_F(OBJModelTest, Sorting) {
+TEST_F(OBJModelTest, ColorPersistence) {
     OBJModel model;
-    model.loadFromFile("valid.obj");
+    model.loadFromFile("complex_input.obj");
+    
+    model.setColorOBJ(0xFFA500);
+
+    for(const auto& t : model.getTriangles()) {
+        ASSERT_EQ(t.getColor(), 0xFFA500);
+    }
+    
     model.merge(model);
+    model.removeUnusedVertices();
     
-    model.sortPoints();
-    const auto& verts = model.getPoints();
-    EXPECT_TRUE(std::is_sorted(verts.begin(), verts.end()));
-    
-    model.sortTriangles();
-    const auto& tris = model.getTriangles();
-    EXPECT_TRUE(std::is_sorted(tris.begin(), tris.end()));
+    for(const auto& t : model.getTriangles()) {
+        EXPECT_EQ(t.getColor(), 0xFFA500);
+    }
 }
 
 int main(int argc, char** argv) {

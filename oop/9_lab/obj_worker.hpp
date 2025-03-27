@@ -1,46 +1,37 @@
 #pragma once
 
-#include <iostream>
 #include <vector>
-#include <algorithm>
-#include <cmath>
-#include <fstream>
-#include <list>
 #include <unordered_map>
-#include <functional> 
 #include <string>
-#include <cstdint>  
+#include <fstream>
 #include <sstream>
-
-#define EPSILON 1e-6
+#include <unordered_set>
+#include <cmath>
+#include <algorithm>
+#include <cstdint>
 
 class Point {
 private:
-    _Float32 x;
-    _Float32 y;
-    _Float32 z;
+    float x, y, z;
 
 public:
-    Point(_Float32 x = 0, _Float32 y = 0, _Float32 z = 0) :
-        x(x), y(y), z(z) {}
+    Point(float x = 0, float y = 0, float z = 0) : x(x), y(y), z(z) {}
 
-    ~Point() = default;
+    bool operator==(const Point& other) const;
 
-    bool operator==(const Point& other) const noexcept;
+    Point& operator=(const Point&) = default;
 
-    bool operator<(const Point& other) const noexcept ;
+    inline float getX() const;
+    inline float getY() const;
+    inline float getZ() const;
 
-    _Float32 distance(const Point& other) const;
-
-    _Float32 dot(const Point& other) const;
-
-    inline _Float32 getX() const;
-    inline _Float32 getY() const;
-    inline _Float32 getZ() const;
-
-    inline void setX(_Float32 x);
-    inline void setY(_Float32 y);
-    inline void setZ(_Float32 z);
+    struct Hash {
+        size_t operator()(const Point& p) const {
+            return std::hash<float>()(p.x) ^
+                   (std::hash<float>()(p.y) << 1) ^
+                   (std::hash<float>()(p.z) << 2);
+        }
+    };
 };
 
 class Triangle {
@@ -50,52 +41,48 @@ private:
     uint32_t v3;
     uint32_t color;
 
-public: 
-    Triangle(uint32_t v1 = 0, uint32_t v2 = 0, uint32_t v3 = 0, uint32_t color = 0) :
-        v1(v1), v2(v2), v3(v3), color(color) {}
+public:
+    Triangle(uint32_t v1 = 0, uint32_t v2 = 0, uint32_t v3 = 0, uint32_t color = 0)
+        : v1(v1), v2(v2), v3(v3), color(color) {}
 
-    ~Triangle() = default;
+    inline uint32_t getV1() const;
+    inline uint32_t getV2() const;
+    inline uint32_t getV3() const;
+    inline uint32_t getColor() const;
 
-    bool operator==(const Triangle& other) const;
-    bool operator<(const Triangle& other) const;
+    inline void setV1(uint32_t v);
+    inline void setV2(uint32_t v);
+    inline void setV3(uint32_t v);
+    inline void setColor(uint32_t c);
 
-    inline uint32_t getV1() const; 
-    inline uint32_t getV2() const; 
-    inline uint32_t getV3() const; 
-    inline uint32_t getColor() const; 
+    inline bool operator<(const Triangle& other) const;
 
-    inline void setV1(uint32_t v1); 
-    inline void setV2(uint32_t v2);
-    inline void setV3(uint32_t v3);
-    inline void setColor(uint32_t color);
-};
-
-template<> struct std::hash<Point> {
-    size_t operator()(const Point& p) const noexcept {
-        return hash<float>()(p.getX()) ^ 
-              (hash<float>()(p.getY()) << 1) ^ 
-              (hash<float>()(p.getZ()) << 2);
-    }
 };
 
 class OBJModel {
 private:
-    std::list<Point> points;
-    std::list<Triangle> triangles;
+    std::vector<Point> points;
+    std::vector<Triangle> triangles;
+    std::unordered_map<Point, size_t, Point::Hash> vertexMap;
 
-    int findOrAddVertex(const Point& v);
+    size_t findOrAddVertex(const Point& v);
 
 public:
-    OBJModel() = default;
-    ~OBJModel() = default;
-
     bool loadFromFile(const std::string& filename);
-    void setColorOBJ(const u_int32_t color);
-    void merge(OBJModel& other);
-    void sortPoints();
-    void sortTriangles();
-    void print() const;
 
-    const std::list<Triangle>& getTriangles() const;
-    const std::list<Point>& getPoints() const;
+    void removeUnusedVertices();
+
+    void merge(const OBJModel& other);
+
+    void setColorOBJ(uint32_t color);
+
+    void sortPoints();
+
+    void sortTriangles();
+
+    const std::vector<Point>& getPoints() const;
+
+    const std::vector<Triangle>& getTriangles() const;
+
+    void saveToFile(const std::string& filename) const;
 };

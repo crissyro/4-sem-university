@@ -20,8 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::onStudentSelected);
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
 }
 
@@ -105,8 +104,8 @@ void MainWindow::on_addSubjectButton_clicked() {
 }
 
 void MainWindow::on_addGradeButton_clicked() {
-    auto student = getSelectedStudent();
-    auto subject = getSelectedSubject();
+    Student* student = getSelectedStudent();
+    Subject* subject = getSelectedSubject();
     
     if(!student || !subject) {
         QMessageBox::warning(this, "Ошибка", "Выберите студента и предмет!");
@@ -114,15 +113,23 @@ void MainWindow::on_addGradeButton_clicked() {
     }
     
     bool ok;
-    int value = QInputDialog::getInt(
+    const int value = QInputDialog::getInt(
         this, "Новая оценка", "Введите оценку (1-5):", 3, 1, 5, 1, &ok);
     
     if(ok) {
-        QDate date = QDate::currentDate();
-        student->addGrade(SmartPointer<Grade>(
-            new Grade(value, date, std::move(subject))
-        ));
-        updateGradesTable();
+        try {
+            const QDate date = QDate::currentDate();
+            auto newSubject = MakeSmart<Subject>(subject->getName());
+            student->addGrade(MakeSmart<Grade>(
+                value, 
+                date, 
+                std::move(newSubject)
+            ));
+            updateGradesTable();
+        } 
+        catch(const std::exception& e) {
+            QMessageBox::critical(this, "Ошибка", e.what());
+        }
     }
 }
 
@@ -135,51 +142,55 @@ void MainWindow::updateSubjectsList() {
 
 void MainWindow::updateGradesTable() {
     ui->gradesTable->setRowCount(0);
-    auto student = getSelectedStudent();
     
-    if(student) {
-        int row = 0;
-        for(const auto& grade : student->getGrades()) {
-            ui->gradesTable->insertRow(row);
-            ui->gradesTable->setItem(row, 0, 
-                new QTableWidgetItem(grade->getSubject()->getName()));
-            ui->gradesTable->setItem(row, 1, 
-                new QTableWidgetItem(QString::number(grade->getValue())));
-            ui->gradesTable->setItem(row++, 2, 
-                new QTableWidgetItem(grade->getDate().toString("dd.MM.yyyy")));
-        }
-    }
-}
-
-SmartPointer<Student> MainWindow::getSelectedStudent() const {
-    int groupIndex = ui->groupsList->currentRow();
-    int studentIndex = ui->studentsList->currentRow();
-    
-    if(groupIndex >= 0 && studentIndex >= 0) {
-        const auto& groups = journal.getGroups();
-        if(static_cast<size_t>(groupIndex) < groups.size()) {
-            const auto& students = groups[groupIndex]->getStudents();
-            if(static_cast<size_t>(studentIndex) < students.size()) {
-                return SmartPointer<Student>(students[studentIndex].get());
+    if(auto student = getSelectedStudent()) {
+        const auto& grades = student->getGrades();
+        ui->gradesTable->setRowCount(grades.size());
+        
+        for(int row = 0; row < static_cast<int>(grades.size()); ++row) {
+            const auto& grade = grades[row]; 
+            if(grade) {
+                QString subjectName = grade->getSubject() 
+                    ? grade->getSubject()->getName() 
+                    : "Неизвестный предмет";
+                
+                ui->gradesTable->setItem(row, 0, new QTableWidgetItem(subjectName));
+                ui->gradesTable->setItem(row, 1, 
+                    new QTableWidgetItem(QString::number(grade->getValue())));
+                ui->gradesTable->setItem(row, 2, 
+                    new QTableWidgetItem(grade->getDate().toString("dd.MM.yyyy")));
             }
         }
     }
-    return SmartPointer<Student>();
 }
 
-SmartPointer<Subject> MainWindow::getSelectedSubject() const {
-    int index = ui->subjectsComboBox->currentIndex();
+Student* MainWindow::getSelectedStudent() const {
+    const int groupIndex = ui->groupsList->currentRow();
+    const int studentIndex = ui->studentsList->currentRow();
+    
+    if(groupIndex >= 0 && studentIndex >= 0) {
+        const auto& groups = journal.getGroups();
+        if(groupIndex < static_cast<int>(groups.size())) {
+            const auto& students = groups[groupIndex]->getStudents();
+            if(studentIndex < static_cast<int>(students.size())) {
+                return students[studentIndex].get(); // Возвращаем сырой указатель
+            }
+        }
+    }
+    return nullptr;
+}
+
+Subject* MainWindow::getSelectedSubject() const {
+    const int index = ui->subjectsComboBox->currentIndex();
     const auto& subjects = journal.getSubjects();
     
-    if(index >= 0 && static_cast<size_t>(index) < subjects.size()) {
-        return SmartPointer<Subject>(subjects[index].get());
+    if(index >= 0 && index < static_cast<int>(subjects.size())) {
+        return subjects[index].get(); 
     }
-    return SmartPointer<Subject>(); 
+    return nullptr;
 }
 
 void MainWindow::onStudentSelected(int index) {
-    Q_UNUSED(index); // Подавляем предупреждение о неиспользуемой переменной
-    
-    // Обновляем таблицу оценок при выборе студента
+    Q_UNUSED(index); 
     updateGradesTable();
 }

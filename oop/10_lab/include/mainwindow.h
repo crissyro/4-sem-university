@@ -22,6 +22,7 @@ private slots:
     void on_addGradeButton_clicked();
     void onGroupSelected(int index);
     void onStudentSelected(int index);
+    
 
 private:
     Ui::MainWindow *ui;
@@ -32,8 +33,8 @@ private:
     void updateSubjectsList();
     void updateGradesTable();
     
-    SmartPointer<Student> getSelectedStudent() const;
-    SmartPointer<Subject> getSelectedSubject() const;
+    Student* getSelectedStudent() const;
+    Subject* getSelectedSubject() const;
 };
 
 #endif // MAINWINDOW_H

@@ -1021,7 +1021,9 @@ main.o: src/main.cpp include/mainwindow.h \
 		../../../anaconda3/include/qt/QtCore/qeventloop.h \
 		../../../anaconda3/include/qt/QtWidgets/qdesktopwidget.h \
 		../../../anaconda3/include/qt/QtGui/qguiapplication.h \
-		../../../anaconda3/include/qt/QtGui/qinputmethod.h
+		../../../anaconda3/include/qt/QtGui/qinputmethod.h \
+		../../../anaconda3/include/qt/QtGui/QSurfaceFormat \
+		../../../anaconda3/include/qt/QtGui/qsurfaceformat.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o src/main.cpp
 
 mainwindow.o: src/mainwindow.cpp include/mainwindow.h \

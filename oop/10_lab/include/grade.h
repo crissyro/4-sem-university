@@ -13,15 +13,15 @@ public:
     Grade(int value, const QDate& date, SmartPointer<Subject>&& subject)
         : value(value), date(date), subject(std::move(subject)) {}
 
-    int getValue() const { 
+    inline int getValue() const { 
         return value; 
     }
 
-    QDate getDate() const { 
+    inline QDate getDate() const { 
         return date;
     }
 
-    const SmartPointer<Subject>& getSubject() const { 
+    inline const SmartPointer<Subject>& getSubject() const { 
         return subject; 
     }
 };

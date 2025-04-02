@@ -24,8 +24,7 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::on_addGroupButton_clicked()
-{
+void MainWindow::on_addGroupButton_clicked() {
     bool ok;
     QString name = QInputDialog::getText(
         this, 
@@ -42,27 +41,27 @@ void MainWindow::on_addGroupButton_clicked()
     }
 }
 
-void MainWindow::updateGroupsList()
-{
+void MainWindow::updateGroupsList() {
     ui->groupsList->clear();
     for (const auto& group : journal.getGroups()) {
         ui->groupsList->addItem(group->getName());
     }
 }
 
-void MainWindow::onGroupSelected(int index)
-{
+void MainWindow::onGroupSelected(int index) {
     if (index >= 0 && static_cast<size_t>(index) < journal.getGroups().size()) {
         updateStudentsList();
     }
 }
 
-void MainWindow::updateStudentsList()
-{
+void MainWindow::updateStudentsList() {
     ui->studentsList->clear();
     int groupIndex = ui->groupsList->currentRow();
-    if (groupIndex < 0) return;
-    
+
+    if (groupIndex < 0) {
+        return;
+    }
+
     const auto& students = journal.getGroups()[groupIndex]->getStudents();
     for (const auto& student : students) {
         ui->studentsList->addItem(
@@ -187,6 +186,7 @@ Subject* MainWindow::getSelectedSubject() const {
     if(index >= 0 && index < static_cast<int>(subjects.size())) {
         return subjects[index].get(); 
     }
+    
     return nullptr;
 }
 

@@ -14,19 +14,19 @@ public:
     Student(const QString& firstName, const QString& lastName)
         : firstName(firstName), lastName(lastName) {}
     
-    void addGrade(SmartPointer<Grade> grade) {
+    inline void addGrade(SmartPointer<Grade> grade) {
         grades.push_back(std::move(grade));
     }
     
-    QString getFirstName() const { 
+    inline QString getFirstName() const { 
         return firstName; 
     }
 
-    QString getLastName() const { 
+    inline QString getLastName() const { 
         return lastName;
     }
 
-    const std::vector<SmartPointer<Grade>>& getGrades() const { 
+    inline const std::vector<SmartPointer<Grade>>& getGrades() const { 
         return grades; 
     }
 };

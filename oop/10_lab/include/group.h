@@ -12,15 +12,15 @@ class Group {
 public:
     explicit Group(const QString& name) : name(name) {}
     
-    void addStudent(SmartPointer<Student> student) {
+    inline void addStudent(SmartPointer<Student> student) {
         students.push_back(std::move(student));
     }
     
-    QString getName() const { 
+    inline QString getName() const { 
         return name; 
     }
 
-    const std::vector<SmartPointer<Student>>& getStudents() const { 
+    inline const std::vector<SmartPointer<Student>>& getStudents() const { 
         return students; 
     }
 };

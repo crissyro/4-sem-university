@@ -22,9 +22,17 @@ public:
         return *this;
     }
 
-    T* operator->() const noexcept { return ptr; }
-    T& operator*() const noexcept { return *ptr; }
-    explicit operator bool() const noexcept { return ptr != nullptr; }
+    T* operator->() const noexcept { 
+        return ptr; 
+    }
+
+    T& operator*() const noexcept { 
+        return *ptr; 
+    }
+
+    explicit operator bool() const noexcept { 
+        return ptr != nullptr; 
+    }
 
     void reset(T* p = nullptr) noexcept {
         delete ptr;
@@ -42,7 +50,9 @@ public:
         swap(ptr, other.ptr);
     }
 
-    T* get() const noexcept { return ptr; }
+    T* get() const noexcept { 
+        return ptr; 
+    }
 };
 
 template <typename T>
@@ -51,7 +61,10 @@ class SmartPointer<T[]> {
     
 public:
     explicit SmartPointer(T* p = nullptr) noexcept : ptr(p) {}
-    ~SmartPointer() { delete[] ptr; }
+
+    ~SmartPointer() { 
+        delete[] ptr; 
+    }
     
     SmartPointer(const SmartPointer&) = delete;
     SmartPointer& operator=(const SmartPointer&) = delete;
@@ -67,6 +80,7 @@ public:
         delete[] ptr;
         ptr = p;
     }
+
     T* release() noexcept {
         T* temp = ptr;
         ptr = nullptr;

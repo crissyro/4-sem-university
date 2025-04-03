@@ -7,7 +7,10 @@ class Subject {
     QString name;
 public:
     explicit Subject(const QString& name) : name(name) {}
-    QString getName() const { return name; }
+
+    QString getName() const { 
+        return name;
+    }
 };
 
 #endif // SUBJECT_H

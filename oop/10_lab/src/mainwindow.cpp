@@ -172,7 +172,7 @@ Student* MainWindow::getSelectedStudent() const {
         if(groupIndex < static_cast<int>(groups.size())) {
             const auto& students = groups[groupIndex]->getStudents();
             if(studentIndex < static_cast<int>(students.size())) {
-                return students[studentIndex].get(); // Возвращаем сырой указатель
+                return students[studentIndex].get();
             }
         }
     }

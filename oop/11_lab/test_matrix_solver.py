@@ -1,6 +1,5 @@
 import unittest
 import sys
-
 from io import StringIO
 from matrix_solver import MatrixCollection, Matrix
 
@@ -8,8 +7,8 @@ class TestMatrix(unittest.TestCase):
 
     def test_matrix_creation(self):
         m = Matrix([[1, 2], [3, 4]], 2)
-        self.assertEqual(m.get_row_count(), 2)
-        self.assertEqual(m.get_rows(), [[1, 2], [3, 4]])
+        self.assertEqual(m.get_rows(), 2)
+        self.assertEqual(m.get_matrix(), [[1, 2], [3, 4]])
 
     def test_get_row_sum(self):
         m = Matrix([[1, 2], [3, 4]], 2)
@@ -32,8 +31,8 @@ class TestMatrixCollection(unittest.TestCase):
         ]
         collection = MatrixCollection(raw_input)
         self.assertEqual(len(collection._MatrixCollection__matrices), 2)
-        self.assertEqual(collection._MatrixCollection__matrices[0].get_row_count(), 2)
-        self.assertEqual(collection._MatrixCollection__matrices[1].get_row_count(), 2)
+        self.assertEqual(collection._MatrixCollection__matrices[0].get_rows(), 2)
+        self.assertEqual(collection._MatrixCollection__matrices[1].get_rows(), 2)
 
     def test_find_matching_rows(self):
         raw_input = [
@@ -65,6 +64,58 @@ class TestMatrixCollection(unittest.TestCase):
 
         expected_output = "Матрица 1:\n    4 5 6 → 4 5 6\n\nМатрица 2:\n    4 5 6 → 4 5 6\n\n"
         self.assertEqual(captured_output.getvalue(), expected_output)
+
+
+    def test_display_matches_with_more_data(self):
+        raw_input = [
+            "1 1 1 2",
+            "3 1 1 4",
+            "2 1 5 3",
+            "",
+            "1 1 1 2",
+            "3 1 3 4",
+            "2 1 5 3",
+            "",
+            "1 2 1 1",
+            "1 2 1 5",
+            "1 1 5 4"
+        ]
+        
+        collection = MatrixCollection(raw_input)
+
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        collection.display_matches()
+        sys.stdout = sys.__stdout__
+
+        expected_output = """Матрица 1:
+    1 1 1 2 → 1 1 1 2
+    1 1 1 2 → 1 2 1 1
+    3 1 1 4 → 1 2 1 5
+    2 1 5 3 → 3 1 3 4
+    2 1 5 3 → 2 1 5 3
+    2 1 5 3 → 1 1 5 4
+
+Матрица 2:
+    1 1 1 2 → 1 1 1 2
+    1 1 1 2 → 1 2 1 1
+    3 1 3 4 → 2 1 5 3
+    3 1 3 4 → 1 1 5 4
+    2 1 5 3 → 2 1 5 3
+    2 1 5 3 → 1 1 5 4
+
+Матрица 3:
+    1 2 1 1 → 1 1 1 2
+    1 2 1 1 → 1 1 1 2
+    1 2 1 5 → 3 1 1 4
+    1 1 5 4 → 2 1 5 3
+    1 1 5 4 → 3 1 3 4
+    1 1 5 4 → 2 1 5 3
+
+"""
+    
+        self.assertEqual(captured_output.getvalue(), expected_output)
+
 
 if __name__ == "__main__":
     unittest.main()

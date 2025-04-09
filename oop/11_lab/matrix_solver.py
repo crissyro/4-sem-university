@@ -6,10 +6,10 @@ class Matrix:
     """
 
     def __init__(self, data: list[list[int]], row_count: int):
-        self.__data = data  # сам массив данных
-        self.__row_count = row_count  # количество строк
+        self.__data = data  
+        self.__rows = row_count  
 
-    def get_rows(self) -> list[list[int]]:
+    def get_matrix(self) -> list[list[int]]:
         """Возвращает все строки матрицы."""
         return self.__data
 
@@ -17,9 +17,9 @@ class Matrix:
         """Возвращает сумму элементов строки по индексу."""
         return sum(self.__data[idx])
 
-    def get_row_count(self) -> int:
+    def get_rows(self) -> int:
         """Возвращает количество строк в матрице."""
-        return self.__row_count
+        return self.__rows
 
     def __str__(self) -> str:
         return "\n".join(" ".join(map(str, row)) for row in self.__data)
@@ -68,14 +68,14 @@ class MatrixCollection:
         result = []
 
         for i, matrix in enumerate(self.__matrices):
-            for row_index, row in enumerate(matrix.get_rows()):
+            for row_index, row in enumerate(matrix.get_matrix()):
                 row_sum = matrix.get_row_sum(row_index)
 
                 for j, other_matrix in enumerate(self.__matrices):
                     if i == j:
                         continue 
 
-                    for other_row in other_matrix.get_rows():
+                    for other_row in other_matrix.get_matrix():
                         if sum(other_row) == row_sum:
                             result.append((
                                 i + 1, ' '.join(map(str, row)),
@@ -102,3 +102,4 @@ class MatrixCollection:
             for row_str, match_str in grouped[matrix_id]:
                 print(f"    {row_str} → {match_str}")
             print()
+

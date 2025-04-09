@@ -1,105 +1,106 @@
-from collections import defaultdict
-
 class Matrix:
     """
-    Класс, представляющий одну матрицу.
+    Класс для представления матрицы и работы с суммами строк.
+
+    Атрибуты:
+        data (list of list of int): Данные матрицы, где каждый вложенный список представляет строку.
+
+    Примеры:
+        >>> m1 = Matrix([[1, 2], [3, 4]])
+        >>> m2 = Matrix([[3, 4], [1, 2]])
+        >>> m1 == m2
+        True
+        >>> m3 = Matrix([[1, 1], [2, 2]])
+        >>> m1 == m3
+        False
     """
 
-    def __init__(self, data: list[list[int]], row_count: int):
-        self.__data = data  
-        self.__rows = row_count  
+    def __init__(self, data):
+        self.__data = data
 
-    def get_matrix(self) -> list[list[int]]:
-        """Возвращает все строки матрицы."""
-        return self.__data
+    def row_sums(self):
+        """Возвращает список сумм строк матрицы."""
+        return [sum(row) for row in self.__data]
 
-    def get_row_sum(self, idx: int) -> int:
-        """Возвращает сумму элементов строки по индексу."""
-        return sum(self.__data[idx])
+    def __eq__(self, other):
+        """Проверяет равенство матриц по суммам строк (порядок строк не учитывается)."""
+        return sorted(self.row_sums()) == sorted(other.row_sums())
 
-    def get_rows(self) -> int:
-        """Возвращает количество строк в матрице."""
-        return self.__rows
-
-    def __str__(self) -> str:
-        return "\n".join(" ".join(map(str, row)) for row in self.__data)
+    def __str__(self):
+        """Возвращает строковое представление матрицы."""
+        return '\n'.join([' '.join(map(str, row)) for row in self.__data])
 
 
-class MatrixCollection:
+def process_matrices(input_data):
     """
-    Класс для работы с коллекцией матриц.
+    Обрабатывает входные данные с матрицами, разделенными пустыми строками, 
+    и возвращает пары совпадающих матриц.
+
+    Аргументы:
+        input_data (str): Входные данные в виде строки.
+
+    Возвращает:
+        str: Результат обработки или сообщение об ошибке.
+
+    Примеры:
+        >>> input_data = '1 2\\n3 4\\n\\n4 3\\n2 1'
+        >>> print(process_matrices(input_data))
+        Матрица на входе:
+        1 2
+        3 4
+        <BLANKLINE>
+        Матрица на выходе:
+        4 3
+        2 1
+        <BLANKLINE>
+        Матрица на входе:
+        4 3
+        2 1
+        <BLANKLINE>
+        Матрица на выходе:
+        1 2
+        3 4
+
+        >>> input_data = '1 a\\n2 3'
+        >>> print(process_matrices(input_data))
+        Ошибка: неверный формат входных данных. Строки должны содержать только числа, разделенные пробелами.
     """
+    matrices = []
+    current_matrix_data = []
 
-    def __init__(self, raw_input: list[str]):
-        """
-        Инициализация коллекции матриц из списка строк.
-        """
-        self.__matrices = self.__parse_matrices(raw_input)
+    for line in input_data.splitlines():
+        line = line.strip()
+        if line:
+            try:
+                row = list(map(int, line.split()))
+                current_matrix_data.append(row)
+            except ValueError:
+                return "Ошибка: неверный формат входных данных. Строки должны содержать только числа, разделенные пробелами."
+        else:
+            if current_matrix_data:
+                matrices.append(Matrix(current_matrix_data))
+                current_matrix_data = []
+    
+    if current_matrix_data:
+        matrices.append(Matrix(current_matrix_data))
 
-    def __parse_matrices(self, lines: list[str]) -> list[Matrix]:
-        """
-        Преобразует входной список строк в список объектов Matrix.
-        """
-        matrices = []
-        current_matrix = []
-        row_count = 0
+    if not matrices:
+        return "Нет матриц для обработки."
 
-        for line in lines:
-            if line.strip() == "":
-                if current_matrix:
-                    matrices.append(Matrix(current_matrix, row_count))
-                    current_matrix = []
-                    row_count = 0
-            else:
-                row = list(map(int, line.strip().split()))
-                current_matrix.append(row)
-                row_count += 1
+    output = []
+    for i, matrix in enumerate(matrices):
+        matching_matrices = []
+        for j, other in enumerate(matrices):
+            if i != j and matrix == other:
+                matching_matrices.append(other)
+        
+        if matching_matrices:
+            output.append(f"Матрица на входе:\n{matrix}\n\nМатрица на выходе:\n{matching_matrices[0]}")
 
-        if current_matrix:
-            matrices.append(Matrix(current_matrix, row_count))
+    return '\n\n'.join(output) if output else "Нет совпадающих матриц."
 
-        return matrices
 
-    def __find_matching_rows(self) -> list[tuple[int, str, int, str]]:
-        """
-        Находит совпадающие строки по сумме.
-        Возвращает кортежи: (номер_матрицы_1, строка_1, номер_матрицы_2, строка_2)
-        """
-        result = []
-
-        for i, matrix in enumerate(self.__matrices):
-            for row_index, row in enumerate(matrix.get_matrix()):
-                row_sum = matrix.get_row_sum(row_index)
-
-                for j, other_matrix in enumerate(self.__matrices):
-                    if i == j:
-                        continue 
-
-                    for other_row in other_matrix.get_matrix():
-                        if sum(other_row) == row_sum:
-                            result.append((
-                                i + 1, ' '.join(map(str, row)),
-                                j + 1, ' '.join(map(str, other_row))
-                            ))
-
-        return result
-
-    def display_matches(self) -> None:
-        """
-        Показывает совпадения строк между матрицами, у которых совпадает сумма.
-        Формат:
-        Матрица N:
-            строка → совпадающая строка
-        """
-        matches = self.__find_matching_rows()
-        grouped = defaultdict(list)
-
-        for i, row_str, j, match_str in matches:
-            grouped[i].append((row_str, match_str))
-
-        for matrix_id in sorted(grouped):
-            print(f"Матрица {matrix_id}:")
-            for row_str, match_str in grouped[matrix_id]:
-                print(f"    {row_str} → {match_str}")
-            print()
-
+# from io import StringIO
+# input_data = StringIO("1 1 1 2\n3 1 1 4\n2 1 5 3\n\n1 1 1 2\n3 1 3 4\n2 1 5 3\n\n1 2 1 1\n1 2 1 5\n1 1 5 4")
+# result = process_matrices(input_data.read())
+# print(result)

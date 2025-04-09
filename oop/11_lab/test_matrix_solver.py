@@ -1,121 +1,62 @@
 import unittest
-import sys
+import doctest
+
 from io import StringIO
-from matrix_solver import MatrixCollection, Matrix
+from matrix_solver import Matrix, process_matrices 
 
 class TestMatrix(unittest.TestCase):
+    def test_equality(self):
+        m1 = Matrix([[1, 2], [3, 4]])
+        m2 = Matrix([[3, 4], [1, 2]])
+        self.assertEqual(m1, m2)
 
-    def test_matrix_creation(self):
-        m = Matrix([[1, 2], [3, 4]], 2)
-        self.assertEqual(m.get_rows(), 2)
-        self.assertEqual(m.get_matrix(), [[1, 2], [3, 4]])
+    def test_inequality(self):
+        m1 = Matrix([[1, 2], [3, 4]])
+        m3 = Matrix([[1, 1], [2, 2]])
+        self.assertNotEqual(m1, m3)
 
-    def test_get_row_sum(self):
-        m = Matrix([[1, 2], [3, 4]], 2)
-        self.assertEqual(m.get_row_sum(0), 3)
-        self.assertEqual(m.get_row_sum(1), 7)
+class TestProcessMatrices(unittest.TestCase):
+    def test_basic_case(self):
+        input_data = StringIO("1 2\n3 4\n\n4 3\n2 1")
+        result = process_matrices(input_data.read())
+        expected = (
+            "Матрица на входе:\n1 2\n3 4\n\nМатрица на выходе:\n4 3\n2 1\n\n"
+            "Матрица на входе:\n4 3\n2 1\n\nМатрица на выходе:\n1 2\n3 4"
+        )
+        self.assertEqual(result, expected)
 
-    def test_str_representation(self):
-        m = Matrix([[1, 2], [3, 4]], 2)
-        self.assertEqual(str(m), "1 2\n3 4")
+    def test_invalid_input(self):
+        input_data = StringIO("1 a\n2 3")
+        result = process_matrices(input_data.read())
+        self.assertEqual(result, "Ошибка: неверный формат входных данных. Строки должны содержать только числа, разделенные пробелами.")
 
-class TestMatrixCollection(unittest.TestCase):
-
-    def test_parse_matrices(self):
-        raw_input = [
-            "1 2 3",
-            "4 5 6",
-            "",
-            "7 8 9",
-            "10 11 12"
-        ]
-        collection = MatrixCollection(raw_input)
-        self.assertEqual(len(collection._MatrixCollection__matrices), 2)
-        self.assertEqual(collection._MatrixCollection__matrices[0].get_rows(), 2)
-        self.assertEqual(collection._MatrixCollection__matrices[1].get_rows(), 2)
-
-    def test_find_matching_rows(self):
-        raw_input = [
-            "1 2 3",
-            "4 5 6",
-            "",
-            "7 8 9",
-            "4 5 6"
-        ]
-        collection = MatrixCollection(raw_input)
-        matching_rows = collection._MatrixCollection__find_matching_rows()
-        self.assertEqual(len(matching_rows), 2)
-        self.assertEqual(matching_rows[0], (1, '4 5 6', 2, '4 5 6'))
-
-    def test_display_matches_output(self):
-        raw_input = [
-            "1 2 3",
-            "4 5 6",
-            "",
-            "7 8 9",
-            "4 5 6"
-        ]
-        collection = MatrixCollection(raw_input)
-
-        captured_output = StringIO()
-        sys.stdout = captured_output
-        collection.display_matches()
-        sys.stdout = sys.__stdout__
-
-        expected_output = "Матрица 1:\n    4 5 6 → 4 5 6\n\nМатрица 2:\n    4 5 6 → 4 5 6\n\n"
-        self.assertEqual(captured_output.getvalue(), expected_output)
-
-
-    def test_display_matches_with_more_data(self):
-        raw_input = [
-            "1 1 1 2",
-            "3 1 1 4",
-            "2 1 5 3",
-            "",
-            "1 1 1 2",
-            "3 1 3 4",
-            "2 1 5 3",
-            "",
-            "1 2 1 1",
-            "1 2 1 5",
-            "1 1 5 4"
-        ]
+    def test_empty_input(self):
+        result = process_matrices("")
+        self.assertEqual(result, "Нет матриц для обработки.")
         
-        collection = MatrixCollection(raw_input)
+    def test_task_matrix(self):
+        input_data = StringIO("1 1 1 2\n3 1 1 4\n2 1 5 3\n\n1 1 1 2\n3 1 3 4\n2 1 5 3\n\n1 2 1 1\n1 2 1 5\n1 1 5 4")
+        result = process_matrices(input_data.read())
+        self.assertEqual(result, """Матрица на входе:
+1 1 1 2
+3 1 1 4
+2 1 5 3
 
-        captured_output = StringIO()
-        sys.stdout = captured_output
-        collection.display_matches()
-        sys.stdout = sys.__stdout__
+Матрица на выходе:
+1 2 1 1
+1 2 1 5
+1 1 5 4
 
-        expected_output = """Матрица 1:
-    1 1 1 2 → 1 1 1 2
-    1 1 1 2 → 1 2 1 1
-    3 1 1 4 → 1 2 1 5
-    2 1 5 3 → 3 1 3 4
-    2 1 5 3 → 2 1 5 3
-    2 1 5 3 → 1 1 5 4
+Матрица на входе:
+1 2 1 1
+1 2 1 5
+1 1 5 4
 
-Матрица 2:
-    1 1 1 2 → 1 1 1 2
-    1 1 1 2 → 1 2 1 1
-    3 1 3 4 → 2 1 5 3
-    3 1 3 4 → 1 1 5 4
-    2 1 5 3 → 2 1 5 3
-    2 1 5 3 → 1 1 5 4
+Матрица на выходе:
+1 1 1 2
+3 1 1 4
+2 1 5 3""")
 
-Матрица 3:
-    1 2 1 1 → 1 1 1 2
-    1 2 1 1 → 1 1 1 2
-    1 2 1 5 → 3 1 1 4
-    1 1 5 4 → 2 1 5 3
-    1 1 5 4 → 3 1 3 4
-    1 1 5 4 → 2 1 5 3
-
-"""
-    
-        self.assertEqual(captured_output.getvalue(), expected_output)
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
+    doctest.testmod(verbose=True)
     unittest.main()

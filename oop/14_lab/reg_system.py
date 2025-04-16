@@ -68,4 +68,12 @@ class Task:
         
         self.__resources = new_resources
         
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Task):
+            return NotImplemented
+        
+        return (self.creation_time == other.creation_time and 
+                self.execution_time == other.execution_time and 
+                self.resources == other.resources)
+        
     

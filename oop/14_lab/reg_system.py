@@ -88,3 +88,24 @@ class Task:
         return (f"Task [Created: {self.creation_time.strftime('%Y-%m-%d %H:%M')}, "
                 f"Duration: {self.execution_time}, "
                 f"Resources: {self.resources}]")
+        
+class TaskContainer:
+    """
+    Контейнер для управления и сортировки задач.
+
+    Поддерживаемые сортировки:
+    - Пузырьковая сортировка
+    - Сортировка вставками
+    - Сортировка выбором
+
+    Примеры:
+    >>> tasks = [
+    ...     Task(datetime.datetime(2023, 1, 3), datetime.timedelta(hours=3), 2),
+    ...     Task(datetime.datetime(2023, 1, 1), datetime.timedelta(hours=5), 4),
+    ...     Task(datetime.datetime(2023, 1, 2), datetime.timedelta(hours=1), 6)
+    ... ]
+    >>> container = TaskContainer(tasks)
+    >>> container.bubble_sort(key=lambda x: x.resources)
+    >>> [t.resources for t in container.tasks]
+    [2, 4, 6]
+    """

@@ -76,4 +76,15 @@ class Task:
                 self.execution_time == other.execution_time and 
                 self.resources == other.resources)
         
-    
+    def __lt__(self, other: 'Task') -> bool:
+        return self.creation_time < other.creation_time
+
+    def __repr__(self) -> str:
+        return (f"Task(creation_time={self.creation_time!r}, "
+                f"execution_time={self.execution_time!r}, "
+                f"resources={self.resources})")
+
+    def __str__(self) -> str:
+        return (f"Task [Created: {self.creation_time.strftime('%Y-%m-%d %H:%M')}, "
+                f"Duration: {self.execution_time}, "
+                f"Resources: {self.resources}]")

@@ -30,3 +30,23 @@ class Task:
     False
     """
     __slots__ = ['__creation_time', '__execution_time', '__resources']
+    
+    def __init__(
+        self,
+        creation_time: Optional[datetime.datetime] = None,
+        execution_time: Optional[datetime.timedelta] = None,
+        resources: int = 0,
+        ):
+        
+        self.__creation_time = creation_time if creation_time is not None else datetime.datetime.now()
+        self.__execution_time = execution_time if execution_time is not None else datetime.timedelta(0)
+        
+        if not isinstance(resources, int) or resources < 0:
+            raise ValueError("Resources must be non-negative integer")
+        
+        self._resources = resources
+        
+    @property
+    def get_creation_time(self) -> datetime.datetime:
+        """Возвращает время создания задачи"""
+        return self.__creation_time

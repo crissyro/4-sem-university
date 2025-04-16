@@ -109,3 +109,35 @@ class TaskContainer:
     >>> [t.resources for t in container.tasks]
     [2, 4, 6]
     """
+    
+    __slots__ = ['__tasks']
+    
+    def __init__(self, tasks: Optional[List[Task]] = None):
+        self.__tasks = list(tasks) if tasks else []
+        
+    @property
+    def get_tasks(self) -> List[Task]:
+        """Возвращает список задач"""
+        return self.__tasks
+    
+    @__tasks.setter
+    def set_tasks(self, new_tasks: Optional[List[Task]] = None) -> None:
+        self.__tasks = new_tasks
+        
+    def add_task(self, task: Task) -> None:
+        """Добавляет задачу в контейнер"""
+        self.__tasks.append(task)
+        
+    def __repr__(self) -> str:
+        return f"TaskContainer({self._tasks!r})"
+
+    def __str__(self) -> str:
+        return "\n".join(str(task) for task in self._tasks)
+        
+    def bubble_sort(self, key: Callable[[Task], float] = lambda x: x.creation_time) -> None:
+        """Сортировка пузырьком с возможностью выбора ключа"""
+        n = len(self._tasks)
+        for i in range(n):
+            for j in range(0, n-i-1):
+                if key(self._tasks[j]) > key(self._tasks[j+1]):
+                    self.__tasks[j], self.__tasks[j+1] = self.__tasks[j+1], self.__tasks[j]

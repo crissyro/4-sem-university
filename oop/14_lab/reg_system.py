@@ -44,9 +44,28 @@ class Task:
         if not isinstance(resources, int) or resources < 0:
             raise ValueError("Resources must be non-negative integer")
         
-        self._resources = resources
+        self.__resources = resources
         
     @property
     def get_creation_time(self) -> datetime.datetime:
         """Возвращает время создания задачи"""
         return self.__creation_time
+    
+    @property
+    def execution_time(self) -> datetime.timedelta:
+        """Возвращает требуемое время выполнения"""
+        return self.__execution_time
+    
+    @property
+    def resources(self) -> int:
+        """Возвращает требуемые ресурсы"""
+        return self.__resources
+    
+    @__resources.setter
+    def set_resources(self, new_resources: int) -> None:
+        if not isinstance(new_resources, int) or new_resources < 0:
+            raise ValueError("Resources must be non-negative integer")
+        
+        self.__resources = new_resources
+        
+    

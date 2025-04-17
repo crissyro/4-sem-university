@@ -141,3 +141,22 @@ class TaskContainer:
             for j in range(0, n-i-1):
                 if key(self._tasks[j]) > key(self._tasks[j+1]):
                     self.__tasks[j], self.__tasks[j+1] = self.__tasks[j+1], self.__tasks[j]
+                    
+    def insertion_sort(self, key: Callable[[Task], float] = lambda x: x.creation_time) -> None:
+        """Сортировка вставками с возможностью выбора ключа"""
+        for i in range(1, len(self._tasks)):
+            current = self._tasks[i]
+            j = i-1
+            while j >= 0 and key(current) < key(self._tasks[j]):
+                self._tasks[j+1] = self._tasks[j]
+                j -= 1
+            self._tasks[j+1] = current
+
+    def selection_sort(self, key: Callable[[Task], float] = lambda x: x.creation_time) -> None:
+        """Сортировка выбором с возможностью выбора ключа"""
+        for i in range(len(self._tasks)):
+            min_idx = i
+            for j in range(i+1, len(self._tasks)):
+                if key(self._tasks[j]) < key(self._tasks[min_idx]):
+                    min_idx = j
+            self._tasks[i], self._tasks[min_idx] = self._tasks[min_idx], self._tasks[i]

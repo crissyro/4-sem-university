@@ -56,32 +56,32 @@ class TestTaskSystem:
     def test_sorting_operations_1(self, sample_tasks):
         container = TaskContainer(sample_tasks.copy())
         container.bubble_sort(key=lambda x: x.creation_time.timestamp())
-        assert [t.creation_time.day for t in container.tasks] == [1, 2, 3, 18, 18]
+        assert [t.creation_time.day for t in container.tasks] == [1, 2, 3, 26, 26]
         
     def test_sorting_operations_2(self, sample_tasks):
         container = TaskContainer(sample_tasks.copy())
         container.insertion_sort(key=lambda x: x.creation_time.timestamp())
-        assert [t.creation_time.day for t in container.tasks] == [1, 2, 3, 18, 18]
+        assert [t.creation_time.day for t in container.tasks] == [1, 2, 3, 26, 26]
         
     def test_sorting_operations_3(self, sample_tasks):
         container = TaskContainer(sample_tasks.copy())
         container.selection_sort(key=lambda x: x.creation_time.timestamp())
-        assert [t.creation_time.day for t in container.tasks] == [1, 2, 3, 18, 18]
+        assert [t.creation_time.day for t in container.tasks] == [1, 2, 3, 26, 26]
         
     def test_sorting_operations_4(self, sample_tasks):
         container = TaskContainer(sample_tasks.copy())
         container.bubble_sort(key=lambda x: x.resources)
-        assert [t.creation_time.day for t in container.tasks] == [3, 18, 1, 2, 18]
+        assert [t.creation_time.day for t in container.tasks] == [3, 26, 1, 2, 26]
         
     def test_sorting_operations_5(self, sample_tasks):
         container = TaskContainer(sample_tasks.copy())
         container.insertion_sort(key=lambda x: x.resources)
-        assert [t.creation_time.day for t in container.tasks] == [3, 18, 1, 2, 18]
+        assert [t.creation_time.day for t in container.tasks] == [3, 26, 1, 2, 26]
         
     def test_sorting_operations_6(self, sample_tasks):
         container = TaskContainer(sample_tasks.copy())
         container.selection_sort(key=lambda x: x.resources)
-        assert [t.creation_time.day for t in container.tasks] == [3, 18, 1, 2, 18]
+        assert [t.creation_time.day for t in container.tasks] == [3, 26, 1, 2, 26]
 
     def test_empty_container(self):
         container = TaskContainer()

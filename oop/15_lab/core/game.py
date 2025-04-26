@@ -6,6 +6,7 @@ from core.records import RecordsManager
 
 class Game:
     def __init__(self):
+        pygame.init()
         self.screen = pygame.display.set_mode((cnf.SCREEN_WIDTH, cnf.SCREEN_HEIGHT))
         pygame.display.set_caption("Snake Game")
         self.clock = pygame.time.Clock()
@@ -15,6 +16,7 @@ class Game:
     def reset_game(self):
         self.snake = Snake()
         self.food = Food()
+        self.food.spawn(self.snake.body)
         self.score = 0
         self.game_over = False
         self.paused = False
@@ -92,20 +94,32 @@ class Game:
 
     def draw(self):
         self.screen.fill(cnf.COLOR_BG)
+        
+        for x in range(0, cnf.SCREEN_WIDTH, cnf.GRID_SIZE):
+            pygame.draw.line(self.screen, cnf.COLOR_GRID, (x, 0), (x, cnf.SCREEN_HEIGHT))
+        for y in range(0, cnf.SCREEN_HEIGHT, cnf.GRID_SIZE):
+            pygame.draw.line(self.screen, cnf.COLOR_GRID, (0, y), (cnf.SCREEN_WIDTH, y))
 
         for i, segment in enumerate(self.snake.body):
-            color = cnf.COLOR_SNAKE if i == 0 else (0, 200, 0)
-            x = segment[0] * cnf.GRID_SIZE
-            y = segment[1] * cnf.GRID_SIZE
-            pygame.draw.rect(self.screen, color, (x, y, cnf.GRID_SIZE-1, cnf.GRID_SIZE-1))
+            color = cnf.COLOR_SNAKE_HEAD if i == 0 else cnf.COLOR_SNAKE_BODY
+            x = segment[0] * cnf.GRID_SIZE + 2
+            y = segment[1] * cnf.GRID_SIZE + 2
+            size = cnf.GRID_SIZE - 4
+            pygame.draw.rect(self.screen, color, (x, y, size, size), border_radius=4)
+            
+        food_size = cnf.GRID_SIZE * (0.8 + 0.2 * abs(self.food.animation - 0.5))
+        food_x = self.food.position[0] * cnf.GRID_SIZE + (cnf.GRID_SIZE - food_size) // 2
+        food_y = self.food.position[1] * cnf.GRID_SIZE + (cnf.GRID_SIZE - food_size) // 2
+        pygame.draw.rect(
+            self.screen, 
+            cnf.COLOR_FOOD, 
+            (food_x, food_y, food_size, food_size), 
+            border_radius=int(food_size/4)
+        )
 
-        food_x = self.food.position[0] * cnf.GRID_SIZE
-        food_y = self.food.position[1] * cnf.GRID_SIZE
-        pygame.draw.rect(self.screen, cnf.COLOR_FOOD, (food_x, food_y, cnf.GRID_SIZE-1, cnf.GRID_SIZE-1))
 
         score_text = cnf.FONT.render(
-            f"Score: {self.score} | Record: "
-            f"{self.records_manager.get_record(self.difficulty.name.lower())}", 
+            f"Score: {self.score} | Record: {self.records_manager.get_record(self.difficulty.name.lower())}", 
             True, cnf.COLOR_TEXT
         )
         

@@ -1,7 +1,6 @@
+from config.config import GRID_WIDTH, GRID_HEIGHT
 from enum import Enum
 from typing import List, Tuple
-
-from config.config import GRID_WIDTH, GRID_HEIGHT
 
 class Direction(Enum):
     UP = (0, -1)
@@ -11,14 +10,17 @@ class Direction(Enum):
 
 class Snake:
     def __init__(self):
+        self.reset()
+        
+    def reset(self):
         self.body: List[Tuple[int, int]] = [(GRID_WIDTH // 2, GRID_HEIGHT // 2)]
         self.direction = Direction.RIGHT
         self.new_direction = None
+        self.grow_next_move = False
 
     def change_direction(self, new_dir: Direction):
         old_x, old_y = self.direction.value
         new_x, new_y = new_dir.value
-        
         if (new_x + old_x, new_y + old_y) != (0, 0):
             self.new_direction = new_dir
 
@@ -35,9 +37,14 @@ class Snake:
         )
         
         self.body.insert(0, new_head)
+        
+        if not self.grow_next_move:
+            self.body.pop()
+        else:
+            self.grow_next_move = False
 
     def grow(self):
-        self.body.append(self.body[-1])
+        self.grow_next_move = True
 
     def check_self_collision(self):
-        return len(self.body) != len(set(self.body))
+        return self.body[0] in self.body[1:]
